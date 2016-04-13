@@ -17,6 +17,7 @@ from obstacle import Obstacle
 from geometry import calculateIntersectPoint
 import math
 import sys
+import time
  
 def main():
     # Define some colors
@@ -41,6 +42,11 @@ def main():
 
     # Initialize car
     c = Car(Vector2(350, 250), Vector2(0, -3), 3)
+    trial_num = 1
+    start_time = time.time()
+    cur_time = time.time()
+    elapsed_time = (cur_time - start_time)
+    best_time = -1.0
 
     # Initialize obstacles
     obstacles = generate_obstacles()
@@ -54,10 +60,15 @@ def main():
      
         # --- Game logic should go here
         handle_keypresses(c)
-        sensor_hits = c.update(obstacles, (700, 500))
+        (sensor_hits, did_reset) = c.update(obstacles, (700, 500))
+        if did_reset:
+            trial_num += 1
+            start_time = time.time()
+            if elapsed_time > best_time:
+                best_time = elapsed_time
 
-
-
+        cur_time = time.time()
+        elapsed_time = (cur_time - start_time)
      
         # --- Screen-clearing code goes here
      
@@ -88,7 +99,14 @@ def main():
             if s_hit:
                 pygame.draw.circle(screen, RED, s_hit, 5, 0)
 
-
+        # #HUD
+        hud_str = """Trial: %s     Elapsed Time: % 6.2f     Best Time: % 6.2f""" % (trial_num, elapsed_time, best_time)
+        font = pygame.font.Font(None, 36)
+        text = font.render(hud_str, 1, WHITE)
+        textrect = text.get_rect()
+        textrect.centerx = screen.get_rect().centerx
+        textrect.centery = 490
+        screen.blit(text, textrect)
         
      
         # --- Go ahead and update the screen with what we've drawn.

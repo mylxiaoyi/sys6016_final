@@ -1,13 +1,37 @@
 import random
+import sklearn
+import skflow
+import numpy as np
+from neuralnet import NeuralNet
 
 class Q_Learner():
-	def __init__(self, actions, epsilon=0.1, alpha=0.2, gamma=0.9):
+	def __init__(self, actions, epsilon=0.3, alpha=0.2, gamma=0.9):
 		self.q = {}
 
 		self.epsilon = epsilon
 		self.alpha = alpha
 		self.gamma = gamma
 		self.actions = actions
+
+		self.nn = NeuralNet()
+
+	def getNNInput(self, state, action):
+		ret = np.ndarray(shape=(1,6))
+		ret[0][0] = state[0]
+		ret[0][1] = state[1]
+		ret[0][2] = state[2]
+		ret[0][3] = state[3]
+		ret[0][4] = state[4]
+		ret[0][5] = action
+
+		return ret
+
+	def getNNExpectedResult(self, state, action):
+		qval =  self.q[(state, action)]
+		return qval
+
+	def getQNN(self, state, action):
+		return self.nn.predict(self.getNNInput(state, action))
 
 	def getQ(self, state, action):
 		return self.q.get((state, action), 0.0)
@@ -19,12 +43,16 @@ class Q_Learner():
 		else:
 			self.q[(state, action)] = old_val + self.alpha * (value + old_val)
 
+		print "q val: %s" % self.getNNExpectedResult(state, action)
+
+		self.nn.fit(self.getNNInput(state, action), self.getNNExpectedResult(state, action))
+
 	def chooseAction(self, state):
 
 		if random.random() < self.epsilon:
 			action = random.choice(self.actions)
 		else:
-			q = [self.getQ(state, a) for a in self.actions]
+			q = [self.getQNN(state, a) for a in self.actions]
 			maxQ = max(q)
 			count = q.count(maxQ)
 			if count > 1:

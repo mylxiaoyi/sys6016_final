@@ -72,11 +72,26 @@ class Car():
 		for i in range(len(s_data)):
 			if s_data[i] > self.sensor_length:
 				s_data[i] = 0
-			rem = s_data[i] % 10
-			if rem < 5:
-				s_data[i] = int(s_data[i] / 10) * 10
+			elif s_data[i] < 10:
+				s_data[i] = 1
+			elif s_data[i] < 20:
+				s_data[i] = 2
+			elif s_data[i] < 30:
+				s_data[i] = 3
+			elif s_data[i] < 40:
+				s_data[i] = 4
+			elif s_data[i] < 50:
+				s_data[i] = 5
+			elif s_data[i] < 60:
+				s_data[i] = 6
+			elif s_data[i] < 70:
+				s_data[i] = 7
+			elif s_data[i] < 80:
+				s_data[i] = 8
+			elif s_data[i] < 90:
+				s_data[i] = 9
 			else:
-				s_data[i] = int((s_data[i] + 10) / 10) * 10
+				s_data[i] = 10
 
 		return (s_data[0], s_data[1], s_data[2], s_data[3], s_data[4])
 
@@ -105,9 +120,6 @@ class Car():
 		state = self.calc_state(sensor_data)
 		action = self.ai.chooseAction(state)
 		print "%s: %s" %  (state, action)
-		self.lastState = state
-		self.lastAction = action
-
 
 		if action == 0:
 			self.turn_left()
@@ -115,17 +127,31 @@ class Car():
 			self.turn_right()
 		self.update_position()
 
+		did_reset = False
+
 		if self.out_of_bounds(window_bounds) or self.collision(obstacles):
 			self.crashes += 1
 			reward = -100
 			if self.lastState is not None:
 				self.ai.learn(self.lastState, self.lastAction, reward, state)
 			self.lastState = None
+			self.lastAction = None
 
 			self.reset()
 
+			did_reset = True
+		else:
+			reward = 0
+			if self.lastState is not None:
+				self.ai.learn(self.lastState, self.lastAction, reward, state)
 
-		return sensor_data
+
+		self.lastState = state
+		self.lastAction = action
+
+
+
+		return (sensor_data, did_reset)
 
 
 	def update_sensor_angle(self, angle):
