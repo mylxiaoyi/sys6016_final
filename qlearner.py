@@ -5,7 +5,7 @@ import numpy as np
 from neuralnet import NeuralNet
 
 class Q_Learner():
-	def __init__(self, actions, epsilon=0.3, alpha=0.2, gamma=0.9):
+	def __init__(self, actions, epsilon=0.1, alpha=0.2, gamma=0.9):
 		self.q = {}
 
 		self.epsilon = epsilon
@@ -26,9 +26,9 @@ class Q_Learner():
 
 		return ret
 
-	def getNNExpectedResult(self, state, action):
-		qval =  self.q[(state, action)]
-		return qval
+	# def getNNExpectedResult(self, state, action):
+	# 	qval =  self.q[(state, action)]
+	# 	return qval
 
 	def getQNN(self, state, action):
 		return self.nn.predict(self.getNNInput(state, action))
@@ -37,15 +37,19 @@ class Q_Learner():
 		return self.q.get((state, action), 0.0)
 
 	def learnQ(self, state, action, reward, value):
-		old_val = self.q.get((state, action), None)
-		if old_val is None:
-			self.q[(state, action)] = reward
-		else:
-			self.q[(state, action)] = old_val + self.alpha * (value + old_val)
+		old_val = self.getQNN(state, action)
+		# if old_val is None:
+		# 	self.q[(state, action)] = reward
+		# else:
+		# 	self.q[(state, action)] = old_val + self.alpha * (value + old_val)
 
-		print "q val: %s" % self.getNNExpectedResult(state, action)
+		expected_val = old_val + self.alpha * (value + old_val)
+		print "expected q val: %s" % expected_val 
+		print "value: %s" % value
 
-		self.nn.fit(self.getNNInput(state, action), self.getNNExpectedResult(state, action))
+		# print "q val: %s" % self.getNNExpectedResult(state, action)
+
+		self.nn.fit(self.getNNInput(state, action), expected_val)
 
 	def chooseAction(self, state):
 
@@ -65,5 +69,5 @@ class Q_Learner():
 		return action
 
 	def learn(self, state1, action1, reward, state2):
-		maxqnew = max([self.getQ(state2, a) for a in self.actions])
+		maxqnew = max([self.getQNN(state2, a) for a in self.actions])
 		self.learnQ(state1, action1, reward, reward + self.gamma*maxqnew)

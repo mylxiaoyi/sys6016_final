@@ -6,7 +6,7 @@ class NeuralNet():
 	def __init__(self):
 		self.nn_input_dim = 6
 		self.nn_output_dim = 1
-		self.epsilon = 1.0 # learning rate for gradient descent
+		self.epsilon = 0.5 # learning rate for gradient descent
 		self.reg_lambda = 0.01 # regularization strength
 
 		self.syn0 = self.randomize((6, 10))
