@@ -1,6 +1,5 @@
 import random
 import sklearn
-import skflow
 import numpy as np
 from neuralnet import NeuralNet
 
