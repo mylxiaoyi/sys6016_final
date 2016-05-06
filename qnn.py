@@ -27,8 +27,6 @@ class QNN:
 		self.rms = RMSprop()
 		self.model.compile(loss='mse', optimizer=self.rms)
 
-		print self.model.predict(np.zeros((1, 5)), batch_size=1)
-
 		self.gamma = 0.9
 		self.epsilon = 1
 
@@ -37,11 +35,7 @@ class QNN:
 
 	def chooseAction(self, state):
 		state = np.asarray(state)
-		print state.shape
-		print "choosing action"
-		print state.reshape(1, 5)
 		self.qval = self.model.predict(state.reshape((1, 5)), batch_size=1)
-		print self.qval
 		if random.random() < self.epsilon:
 			action = np.random.randint(0, 3)
 		else:
@@ -65,7 +59,7 @@ class QNN:
 		else:
 			update = reward
 		y[0][self.action] = update
-		self.model.fit(last_state.reshape(1,5), y, batch_size=1, nb_epoch=1, verbose=1)
+		self.model.fit(last_state.reshape(1,5), y, batch_size=1, nb_epoch=1, verbose=0)
 
 		if self.epsilon > 0.1:
 			self.epsilon -= (1/10000)

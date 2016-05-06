@@ -27,6 +27,8 @@ import time
 # Constants #
 #############
 
+LOG_PATH = "./log_data/output.log"
+
 # RGB color definitions
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -91,6 +93,7 @@ def main(args):
     cur_time = time.time()
     elapsed_time = (cur_time - start_time)
     best_time = -1.0
+    num_frames = 0
 
     # Initialize obstacles
     obstacles = generate_obstacles()
@@ -119,6 +122,10 @@ def main(args):
             # Update best time, if necessary
             if elapsed_time > best_time:
                 best_time = elapsed_time
+
+            # Log num frames survived
+            with open(LOG_PATH, "a") as f:
+                f.write(str(num_frames) + "\n")
 
         # Update elapsed time
         cur_time = time.time()
@@ -174,6 +181,7 @@ def main(args):
      
         # --- Limit to 60 frames per second
         clock.tick(60)
+        num_frames += 1
      
     # Close the window and quit.
     pygame.quit()
