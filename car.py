@@ -10,11 +10,15 @@ import datetime
 import json
 import os
 from ast import literal_eval
+from qnn import QNN
 
 #############
 # Constants #
 #############
 RESPONSES = 3
+REWARD_CRASH = -100
+REWARD_SENSOR = -1
+REWARD_CLEAR = 10
 
 class Car():
 	"""
@@ -46,7 +50,8 @@ class Car():
 						self.base_sensor.rotate(40)]
 
 		# Set machine learning algorithm to be used by car to explore space
-		self.ai = RandQLearn(actions = range(RESPONSES),  alpha=0.1, gamma=0.9, epsilon=0.1)
+		# self.ai = RandQLearn(actions = range(RESPONSES),  alpha=0.1, gamma=0.9, epsilon=0.1)
+		self.ai = QNN()
 
 		# Initialize variables which contain relevant car data
 		self.crashes = 0
@@ -117,6 +122,8 @@ class Car():
 
 		for i in range(len(s_data)):
 			s_data[i] = int(s_data[i] / 20)	
+			if s_data[i] > 10:
+				s_data[i] = 11
 
 		return (s_data[0], s_data[1], s_data[2], s_data[3], s_data[4])
 
@@ -199,9 +206,8 @@ class Car():
 		# If crashed, provide very large negative reward
 		if self.out_of_bounds(window_bounds) or self.collision(obstacles):
 			self.crashes += 1
-			reward = -100
 			if self.lastState is not None:
-				self.ai.learn(self.lastState, self.lastAction, reward, state)
+				self.ai.learn(self.lastState, self.lastAction, REWARD_CRASH, self.calc_state(sensor_data))
 			self.lastState = None
 			self.lastAction = None
 
@@ -214,16 +220,14 @@ class Car():
 
 		# If sensors are not triggering (in open space), provide large positive reward
 		elif sensor_data[0]["dist"] == 0 and sensor_data[1]["dist"] == 0 and sensor_data[2]["dist"] == 0 and sensor_data[3]["dist"] == 0 and sensor_data[4]["dist"] == 0:
-			reward = 10
 			if self.lastState is not None:
-				self.ai.learn(self.lastState, self.lastAction, reward, state)	
+				self.ai.learn(self.lastState, self.lastAction, REWARD_CLEAR, state)	
 
 		# Otherwise, provide very small reward (want to stay away from all "crashable" regions 
 		# as much as possible)
 		else:
-			reward = -1
 			if self.lastState is not None:
-				self.ai.learn(self.lastState, self.lastAction, reward, state)
+				self.ai.learn(self.lastState, self.lastAction, REWARD_SENSOR, state)
 
 		# Update stored last state and action taken
 		self.lastState = state

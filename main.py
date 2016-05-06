@@ -44,7 +44,7 @@ CAR_PARAMS = {
     "turn_radius": 3,
     "sensor_length": 200,
     "load_state_path": None,
-    "log_state": True
+    "log_state": False
 }
 
 # Obstacle parameters
