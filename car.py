@@ -16,8 +16,8 @@ from qnn import QNN
 # Constants #
 #############
 RESPONSES = 3
-REWARD_CRASH = -100
-REWARD_SENSOR = -1
+REWARD_CRASH = -10
+REWARD_SENSOR = 0
 REWARD_CLEAR = 10
 
 class Car():
@@ -120,10 +120,22 @@ class Car():
 		s_data.append(int(sensor_data[3]["dist"]))
 		s_data.append(int(sensor_data[4]["dist"]))
 
+		# for i in range(len(s_data)):
+		# 	s_data[i] = int(s_data[i] / 20)	
+		# 	if s_data[i] > 10:
+		# 		s_data[i] = 11
+
+		#normalize sensor output
 		for i in range(len(s_data)):
-			s_data[i] = int(s_data[i] / 20)	
-			if s_data[i] > 10:
-				s_data[i] = 11
+			s_data[i] = s_data[i] / self.sensor_length
+
+			#clamp data
+			if s_data[i] > 1.0:
+				s_data[i] = 1.0
+			elif s_data[i] < 0.0:
+				s_data[i] = 0.0
+
+
 
 		return (s_data[0], s_data[1], s_data[2], s_data[3], s_data[4])
 
@@ -217,6 +229,8 @@ class Car():
 
 			if self.log_state and self.crashes % 1000 == 0 and self.crashes != 0:
 				self.save_state()
+
+			self.ai.epsilon -= (1/2000)
 
 		# If sensors are not triggering (in open space), provide large positive reward
 		elif sensor_data[0]["dist"] == 0 and sensor_data[1]["dist"] == 0 and sensor_data[2]["dist"] == 0 and sensor_data[3]["dist"] == 0 and sensor_data[4]["dist"] == 0:
