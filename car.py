@@ -127,7 +127,7 @@ class Car():
 
 		#normalize sensor output
 		for i in range(len(s_data)):
-			s_data[i] = s_data[i] / self.sensor_length
+			s_data[i] = s_data[i] / float(self.sensor_length)
 
 			#clamp data
 			if s_data[i] > 1.0:
@@ -136,7 +136,7 @@ class Car():
 				s_data[i] = 0.0
 
 
-
+		print s_data
 		return (s_data[0], s_data[1], s_data[2], s_data[3], s_data[4])
 
 	def check_sensors(self, obstacles, window_bounds):
