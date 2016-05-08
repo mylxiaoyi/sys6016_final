@@ -13,7 +13,7 @@ For our project, we built a 2-D model of a self-taught autonomous car which impr
 
 python main.py <-numSimulations>
   
-  numSimulations: an int representing the number of trials to complete before displaying to the screen (speeds up training considerably)
+  numSimulations (optional): an int representing the number of trials to complete before displaying to the screen (speeds up training considerably)
 
 ### Dependencies:
 - keras
