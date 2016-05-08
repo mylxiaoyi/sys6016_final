@@ -22,12 +22,13 @@ from geometry import calculateIntersectPoint
 import math
 import sys
 import time
+import os
 
 #############
 # Constants #
 #############
 
-LOG_PATH = "./log_data/output.log"
+LOG_PATH = "./log_data/output.csv"
 
 # RGB color definitions
 BLACK = (0, 0, 0)
@@ -65,8 +66,10 @@ def main(args):
     SIMULATION = None
     if len(args) > 1:
         SIMULATION = int(args[1])
-        print "simulating %s iterations before displaying..."
+        print "simulating %s iterations before displaying..." % SIMULATION
 
+    if os.path.exists(LOG_PATH):
+        os.remove(LOG_PATH)
      
     #initialize pygame
     pygame.init()
@@ -124,8 +127,10 @@ def main(args):
                 best_time = elapsed_time
 
             # Log num frames survived
-            with open(LOG_PATH, "a") as f:
-                f.write(str(num_frames) + "\n")
+            with open(LOG_PATH, "a+") as f:
+                f.write(str(num_frames) + ",")
+
+            num_frames = 0
 
         # Update elapsed time
         cur_time = time.time()
@@ -136,6 +141,8 @@ def main(args):
         screen.fill(BLACK)
      
         # --- Drawing code should go here
+
+        num_frames += 1
 
         # Skip drawing on simulation (speed up early exploration)
         if SIMULATION is not None and trial_num < SIMULATION:
@@ -181,7 +188,6 @@ def main(args):
      
         # --- Limit to 60 frames per second
         clock.tick(60)
-        num_frames += 1
      
     # Close the window and quit.
     pygame.quit()

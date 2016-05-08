@@ -1,3 +1,11 @@
+#q learning code 
+#from https://github.com/studywolf/blog/tree/master/RL/Cat%20vs%20Mouse%20exploration
+#
+#almost all of this code is pulled from baseqlearner.py, which has been annotated.
+#the only difference is that this class
+#modifies the epsilon selection process by 
+#introducing random additions to maxQ based on our epsilon value
+
 import random
 class RandQLearn:
     def __init__(self, actions, epsilon=0.1, alpha=0.2, gamma=0.9):

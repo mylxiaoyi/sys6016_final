@@ -1,3 +1,7 @@
+#attempt at including neural nets with q learning
+#NOTE: NOT USED IN FINAL IMPLEMENTATION (included for completeness)
+
+
 import random
 import sklearn
 import numpy as np

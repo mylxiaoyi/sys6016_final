@@ -3,7 +3,7 @@ from pygame.math import Vector2
 
 class Obstacle():
 	"""
-	Obstacle class
+	Obstacle class - used to represent squares moving around screen
 	"""
 
 	def __init__(self, _p1, width, height, _radius, init_deg):

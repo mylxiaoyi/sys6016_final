@@ -1,3 +1,8 @@
+#Small-scale implementation of a neural net
+#NOTE: NOT USED IN FINAL IMPLEMENTATION (included for completeness)
+#from http://iamtrask.github.io/2015/07/12/basic-python-network/
+
+
 import numpy as np
 
 class NeuralNet():

@@ -15,14 +15,17 @@ from qnn import QNN
 #############
 # Constants #
 #############
-RESPONSES = 3
-REWARD_CRASH = -10
-REWARD_SENSOR = 0
-REWARD_CLEAR = 10
+RESPONSES = 3 #actions that can be taken (left, right, straight)
+REWARD_CRASH = -100 #reward learned if crash
+REWARD_SENSOR = -1 	#reward learned if sensors pick up anything
+REWARD_CLEAR = 10  	#reward if sensors pick up nothing
 
 class Car():
 	"""
-	Car class
+	Car class - used to model our car
+	Maintains two primary components:
+		1. the car body itself (a point in 2d space)
+		2. the car sensors (a set of five points which represent sensor endpoints)
 	"""
 
 	def __init__(self, car_params):
@@ -50,8 +53,9 @@ class Car():
 						self.base_sensor.rotate(40)]
 
 		# Set machine learning algorithm to be used by car to explore space
-		# self.ai = RandQLearn(actions = range(RESPONSES),  alpha=0.1, gamma=0.9, epsilon=0.1)
-		self.ai = QNN()
+		# Easy to swap out a neural network implementation with a table implementation
+		self.ai = RandQLearn(actions = range(RESPONSES),  alpha=0.1, gamma=0.9, epsilon=0.1)
+		# self.ai = QNN()
 
 		# Initialize variables which contain relevant car data
 		self.crashes = 0
@@ -62,6 +66,7 @@ class Car():
 		self.lastAction = None
 
 		# Boolean indicating whether to save state or not
+		# NOTE: only works for q-table
 		self.log_state = car_params["log_state"]
 
 		# Load a previously saved state, if one is provided
@@ -120,23 +125,29 @@ class Car():
 		s_data.append(int(sensor_data[3]["dist"]))
 		s_data.append(int(sensor_data[4]["dist"]))
 
-		# for i in range(len(s_data)):
-		# 	s_data[i] = int(s_data[i] / 20)	
-		# 	if s_data[i] > 10:
-		# 		s_data[i] = 11
+		#######
+		# SELECT NORMALIZATION PROCESS TO BE USED
+		#######
 
-		#normalize sensor output
+
+		# normalize sensor output for q table
+
 		for i in range(len(s_data)):
-			s_data[i] = s_data[i] / float(self.sensor_length)
+			s_data[i] = int(s_data[i] / 20)	
+			if s_data[i] > 10:
+				s_data[i] = 11
 
-			#clamp data
-			if s_data[i] > 1.0:
-				s_data[i] = 1.0
-			elif s_data[i] < 0.0:
-				s_data[i] = 0.0
+		#normalize sensor output for neural net
+		
+		# for i in range(len(s_data)):
+		# 	s_data[i] = s_data[i] / float(self.sensor_length)
 
+		# 	#clamp data
+		# 	if s_data[i] > 1.0:
+		# 		s_data[i] = 1.0
+		# 	elif s_data[i] < 0.0:
+		# 		s_data[i] = 0.0
 
-		print s_data
 		return (s_data[0], s_data[1], s_data[2], s_data[3], s_data[4])
 
 	def check_sensors(self, obstacles, window_bounds):
@@ -230,7 +241,9 @@ class Car():
 			if self.log_state and self.crashes % 1000 == 0 and self.crashes != 0:
 				self.save_state()
 
-			self.ai.epsilon -= (1/2000)
+			if self.ai.epsilon > 0.1:
+				self.ai.epsilon -= (1.0/30000.0)		
+				print "new epsilon: %s" % (self.ai.epsilon)
 
 		# If sensors are not triggering (in open space), provide large positive reward
 		elif sensor_data[0]["dist"] == 0 and sensor_data[1]["dist"] == 0 and sensor_data[2]["dist"] == 0 and sensor_data[3]["dist"] == 0 and sensor_data[4]["dist"] == 0:
